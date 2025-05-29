@@ -9,6 +9,7 @@ namespace tcii::p1
 { // begin namespace tcii::p1
 using namespace cg;
 
+// apenas calculando os limites da caixa usando todos os pontos recebidos
 template <size_t D, IsReal R, IsPointArray<Vec, R, D> A>
 auto
 computeBounds(const A& points)
@@ -75,6 +76,7 @@ prand(size_t n, R min = 0, R max = 1)
   return v;
 }
 
+// especialização pra 3D
 template <typename R> using Points3 = PointVector<3, R>;
 
 } // end namespace tcii::p1
