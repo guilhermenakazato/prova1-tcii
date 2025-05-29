@@ -61,11 +61,12 @@ public:
   KdTree(const KdTree&) = delete;
   KdTree& operator =(const KdTree&) = delete;
 
-  KdTree(KdTree&& tree) noexcept:
-    _root{std::exchange(tree._root, nullptr)},
-    _nodeCount{tree._nodeCount},
-    _leafCount{tree._leafCount},
-    params{tree.params}
+  KdTree(KdTree&& other) noexcept:
+    Base{std::move(other)},
+    _root{std::exchange(other._root, nullptr)},
+    _nodeCount{other._nodeCount},
+    _leafCount{other._leafCount},
+    params{other.params}
   {
     // do nothing
   }

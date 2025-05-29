@@ -1,13 +1,12 @@
 #ifndef __Utils_h
 #define __Utils_h
 
-#include "graphics/Bounds3.h"
+#include "Bounds3.h"
 #include "Concepts.h"
 #include <vector>
 
 namespace tcii::p1
 { // begin namespace tcii::p1
-
 using namespace cg;
 
 template <size_t D, IsReal R, IsPointArray<Vec, R, D> A>

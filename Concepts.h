@@ -5,7 +5,7 @@
 
 namespace tcii::p1
 { // begin namespace tcii::p1
-
+using namespace std;
 template <typename T, typename U>
 concept SameAs = std::same_as<T, U>;
 
