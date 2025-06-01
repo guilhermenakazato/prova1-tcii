@@ -22,10 +22,9 @@ struct Vec<3, real>
   // macro
   ASSERT_REAL(real, "Vec3: floating-point type expected");
 
-  // alias
+  // alias, usa pra checar o tipo de Vec posteriormente
   using value_type = real;
 
-  // acho que ele esqueceu de usar value_type lol
   real x;
   real y;
   real z;

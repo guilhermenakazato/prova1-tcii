@@ -11,6 +11,7 @@ main()
   using R = float;
   using A = PointVector<D, R>;
 
+  // criando uma KdTree com 100 pontos
   constexpr size_t np{100};
   KdTree<D, R, A> tree{prand<D, R>(np)};
   auto& points = tree.points();
@@ -25,6 +26,8 @@ main()
   for (unsigned i = 0; i < np; ++i)
     d += distance(points[i], bounds);
   std::cout << "Distance sum: " << d << '\n';
+
+  // 10 vizinhos do ponto no índice 0 e imprimindo aqueles em um raio de 0.5
   (void)tree.findNeighbors(0, 10);
   tree.forEachNeighbor(0,
     0.5f,
@@ -33,6 +36,7 @@ main()
       std::cout << points[index] << '\n';
       return true;
     });
+    
   puts("Press any key to exit...");
   (void)getchar();
   return 0;

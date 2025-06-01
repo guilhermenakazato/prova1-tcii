@@ -35,6 +35,7 @@ distance(const Vec<D, R>& p, const Bounds<D, R>& bounds)
   return (R)std::sqrt(d);
 }
 
+// retorna um número real entre 0 e 1 
 template <IsReal R>
 inline auto
 srand()
@@ -42,6 +43,7 @@ srand()
   return (R)((double)rand() / RAND_MAX);
 }
 
+// retorna um número entre min e max
 template <IsReal R>
 inline auto
 srand(R min, R max)
@@ -49,6 +51,7 @@ srand(R min, R max)
   return min + srand<R>() * (max - min);
 }
 
+// retorna um ponto de dimensão D e precisão R com os valores de D (x,y,z,....) estando entre min e max
 template <size_t D, IsReal R>
 inline auto
 prand(R min, R max)
@@ -63,6 +66,7 @@ prand(R min, R max)
 template <size_t D, IsReal R>
 using PointVector = std::vector<Vec<D, R>>;
 
+// retorna um vetor com pontos de dimensão D e precisão R com os valores de D (x,y,z,....) estando entre min e max
 template <size_t D, IsReal R>
 inline auto
 prand(size_t n, R min = 0, R max = 1)
