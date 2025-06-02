@@ -29,6 +29,14 @@ public:
     return _points;
   }
 
+  auto begin() const {
+    return _points;
+  }
+
+  auto end() const {
+    return _points + points.size();
+  }
+
 private:
   A _points;
 
@@ -80,7 +88,6 @@ public:
     // do nothing
   }
 
-  // não tem que deletar a árvore inteira...?
   ~KdTree()
   {
     delete _root;
@@ -135,14 +142,54 @@ private:
   struct Node
   {
     Bounds bounds;
+    // unsigned depth;
+    // Node* _children[2];
+    // unsigned _firstPoint;
+    // unsigned _pointCount;
 
     Node(const Bounds& bounds, unsigned depth):
-      bounds{bounds}
+      bounds{bounds}, depth{depth}
     {
       // TODO
+      // factory pattern!
+      /*
+        se tem como dividir e ainda não chegou no final (depth=8), então divida
+        ao dividir, mantenha o pai como Branch e o filho como Leaf
+        chamar recursivamente o método de construção da kdtree?
+      */
     }
 
   }; // Node
+
+  // struct Branch: Node {
+  //   Node* _children = new Node[2];
+
+  //   Branch() {
+
+  //   }
+  // };
+
+  // struct Leaf: Node {
+  //   unsigned _firstPoint;
+  //   unsigned _pointCount;
+  // };
+
+  /*
+    Um ramo possui um ponteiro para seus dois n´os filhos (que podem ser alocados 
+    sequencialmente em memória dinâmica). Uma folha contém um índice usado para 
+    determinar qual é o primeiro ponto do subconjunto de pontos do nó e um contador 
+    do número de pontos.
+
+    Branch: Node {
+      _leftChild
+      _rightChild
+    }
+
+    Leaf: Node {
+      _firstPoint
+      _pointCounter
+    }
+  */
 
   Node* _root{};
   unsigned _nodeCount{};
@@ -158,7 +205,40 @@ KdTree<D, R, A>::KdTree(A&& points, const Params& params):
 {
   _root = new Node{computeBounds<D, R>(this->points()), 0};
   _nodeCount = _leafCount = 1;
+  
+  /*
+    pensamentos aleatórios
+    talvez, ao invés de _root ser Node, ser um Branch
+    assim, terá children
+    usar estratégia de lookahead de compiladores
+    criar sempre Branch, menos quando não for possível realizar a divisão
+    quando não é possível dividir?
+    quando o Node satisfaz minPoints <= pointCount <= maxPoints
+    depthNode == maxDepth
+    uma função recursiva seria útil
+
+    buildTree(Node* currentNode, ?unsigned i?) {
+      if(i == 2) {
+        return;
+      } else {
+        if(qtdePontosNo > maxPoints && floor(qtdePontosNo/2) > minPoints && currentNode->depth + 1 < maxDepth)
+          dividir
+        senao 
+          i++;
+      }
+    }
+  */
+
   // TODO
+  // provavelmente tudo errado
+  // dividir somente se o nível for menor que o máximo e se tiver mais pontos que o permitido
+  // nó auxiliar pra não perder o começo da árvore
+  // Node* aux{_root};
+  // while(aux->depth < params.maxDepth && aux->_pointCount > params.maxDepth) {
+  //   _points.
+  // } 
+
+  // _root->_children = aux->_children;
 }
 
 // implementação de findNeighbors
