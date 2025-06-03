@@ -5,6 +5,7 @@
 #include "Utils.h"
 #include <functional>
 #include <utility>
+#include <span>
 
 namespace tcii::p1
 { // begin namespace tcii::p1
@@ -29,13 +30,13 @@ public:
     return _points;
   }
 
-  auto begin() const {
-    return _points;
-  }
+  // auto begin() const {
+  //   return _points;
+  // }
 
-  auto end() const {
-    return _points + points.size();
-  }
+  // auto end() const {
+  //   return _points + points.size();
+  // }
 
 private:
   A _points;
@@ -64,10 +65,9 @@ public:
   // maxPointsPerNode = 20
   // minPointsPerNode = 5
   // maxDepth = 8
-  // otimização ou código inútil?
   static constexpr Params dflParams()
   {
-    return {20, 5, 8};
+    return {2, 1, 8};
   }
 
   // construtor a partir de points
@@ -142,54 +142,26 @@ private:
   struct Node
   {
     Bounds bounds;
-    // unsigned depth;
-    // Node* _children[2];
-    // unsigned _firstPoint;
-    // unsigned _pointCount;
+    unsigned depth;
+    bool isLeaf;
 
-    Node(const Bounds& bounds, unsigned depth):
-      bounds{bounds}, depth{depth}
+    union {
+      Node* children[2];
+      struct {
+        size_t pointCount;
+        unsigned firstPoint;
+      } leafData;
+    } nodeData;
+
+    Node(const Bounds& bounds, unsigned depth, size_t pointCount, unsigned firstPoint):
+      bounds{bounds}, 
+      depth{depth}
     {
-      // TODO
-      // factory pattern!
-      /*
-        se tem como dividir e ainda não chegou no final (depth=8), então divida
-        ao dividir, mantenha o pai como Branch e o filho como Leaf
-        chamar recursivamente o método de construção da kdtree?
-      */
+      isLeaf = true;
+      nodeData.leafData.pointCount = pointCount;
+      nodeData.leafData.firstPoint = firstPoint;
     }
-
   }; // Node
-
-  // struct Branch: Node {
-  //   Node* _children = new Node[2];
-
-  //   Branch() {
-
-  //   }
-  // };
-
-  // struct Leaf: Node {
-  //   unsigned _firstPoint;
-  //   unsigned _pointCount;
-  // };
-
-  /*
-    Um ramo possui um ponteiro para seus dois n´os filhos (que podem ser alocados 
-    sequencialmente em memória dinâmica). Uma folha contém um índice usado para 
-    determinar qual é o primeiro ponto do subconjunto de pontos do nó e um contador 
-    do número de pontos.
-
-    Branch: Node {
-      _leftChild
-      _rightChild
-    }
-
-    Leaf: Node {
-      _firstPoint
-      _pointCounter
-    }
-  */
 
   Node* _root{};
   unsigned _nodeCount{};
@@ -203,42 +175,85 @@ KdTree<D, R, A>::KdTree(A&& points, const Params& params):
   Base{std::move(points)},
   params{params}
 {
-  _root = new Node{computeBounds<D, R>(this->points()), 0};
+  std::cout.precision(3);
+  cout << "Original points" << endl;
+  for(auto i = this->points().begin(); i != this->points().end(); i++) {
+    cout << *i << " ";
+  }
+  cout << endl;
+
+  auto size = this->points().size();
+  _root = new Node{computeBounds<D, R>(this->points()), 0, size, 0};
   _nodeCount = _leafCount = 1;
   
-  /*
-    pensamentos aleatórios
-    talvez, ao invés de _root ser Node, ser um Branch
-    assim, terá children
-    usar estratégia de lookahead de compiladores
-    criar sempre Branch, menos quando não for possível realizar a divisão
-    quando não é possível dividir?
-    quando o Node satisfaz minPoints <= pointCount <= maxPoints
-    depthNode == maxDepth
-    uma função recursiva seria útil
+  auto canBeDivided = [params](Node leaf) {
+    if (!leaf.isLeaf) return false;
+    auto leafPointCount = leaf.nodeData.leafData.pointCount;
+    return leafPointCount > params.maxPointsPerNode && leaf.depth < params.maxDepth;
+  };
+  
+  // dimension tem que ser genérico dps!!
+  int dimension = 3;
+  vector<unsigned> indexVector;
+  indexVector.reserve(size);
 
-    buildTree(Node* currentNode, ?unsigned i?) {
-      if(i == 2) {
-        return;
-      } else {
-        if(qtdePontosNo > maxPoints && floor(qtdePontosNo/2) > minPoints && currentNode->depth + 1 < maxDepth)
-          dividir
-        senao 
-          i++;
-      }
+  // inicializando vetor de índices
+  // lembre-se que ele é útil pois não podemos alterar a ordem dos pontos! 
+  for(int i = 0; i < size; i++) {
+    indexVector[i] = i;
+  }
+
+  // definindo a função pra poder fazer recursivo...
+  std::function<void(size_t, size_t, unsigned int, Node&)> buildTree;
+  buildTree = [&](size_t begin, size_t end, unsigned currentDepth, Node& currentNode) {
+    Node& aux = currentNode;
+
+    while(canBeDivided(aux)) {
+      size_t median = (begin + end) / 2;
+      
+      std::nth_element(
+        indexVector.begin() + begin, 
+        indexVector.begin() + median, 
+        indexVector.begin() + end, 
+        [this, currentDepth, dimension](unsigned a, unsigned b) {
+          return this->points()[a][currentDepth % dimension] < this->points()[b][currentDepth % dimension];
+        }
+      );
+
+      currentNode.isLeaf = false;
+      
+      // span pega intervalo [a;b[
+      span left{this->points().begin() + begin, this->points().begin() + median + 1};
+      span right{this->points().begin() + median + 1, this->points().begin() + end};
+
+      
+      size_t leftPointCount = median - begin + 1;
+      size_t rightPointCount = end - median - 1;
+      currentDepth++;
+      
+      cout << "Left children indexes, depth: " << currentDepth << endl;
+      for(auto& e : left) {
+        cout << e << " ";
+      } 
+      cout << endl;
+     
+      cout << "Right children, depth: " << currentDepth << endl;
+      for(auto& e : right) {
+        cout << e << " ";
+      } 
+      cout << endl;
+
+      currentNode.nodeData.children[0] = new Node{computeBounds<D, R>(left), currentDepth, leftPointCount, indexVector[begin]}; 
+      currentNode.nodeData.children[1] = new Node{computeBounds<D, R>(right), currentDepth, rightPointCount, indexVector[median + 1]};
+      _nodeCount += 2;
+      _leafCount++;
+      
+      buildTree(begin, median, currentDepth, *currentNode.nodeData.children[0]);
+      buildTree(median + 1, end, currentDepth, *currentNode.nodeData.children[1]);
     }
-  */
+  };
 
-  // TODO
-  // provavelmente tudo errado
-  // dividir somente se o nível for menor que o máximo e se tiver mais pontos que o permitido
-  // nó auxiliar pra não perder o começo da árvore
-  // Node* aux{_root};
-  // while(aux->depth < params.maxDepth && aux->_pointCount > params.maxDepth) {
-  //   _points.
-  // } 
-
-  // _root->_children = aux->_children;
+  buildTree(0, size, 0, *_root);
 }
 
 // implementação de findNeighbors

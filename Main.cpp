@@ -12,7 +12,7 @@ main()
   using A = PointVector<D, R>;
 
   // criando uma KdTree com 100 pontos
-  constexpr size_t np{100};
+  constexpr size_t np{5};
   KdTree<D, R, A> tree{prand<D, R>(np)};
   auto& points = tree.points();
   auto& bounds = tree.bounds();
@@ -30,7 +30,7 @@ main()
   // 10 vizinhos do ponto no índice 0 e imprimindo aqueles em um raio de 0.5
   (void)tree.findNeighbors(0, 10);
   tree.forEachNeighbor(0,
-    0.5f,
+    2.f,
     [](const A& points, unsigned index)
     {
       std::cout << points[index] << '\n';
