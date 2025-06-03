@@ -176,11 +176,14 @@ KdTree<D, R, A>::KdTree(A&& points, const Params& params):
   params{params}
 {
   std::cout.precision(3);
+
+  #ifdef DEBUG
   cout << "Original points" << endl;
   for(auto i = this->points().begin(); i != this->points().end(); i++) {
     cout << *i << " ";
   }
   cout << endl;
+  #endif
 
   auto size = this->points().size();
   _root = new Node{computeBounds<D, R>(this->points()), 0, size, 0};
@@ -193,9 +196,8 @@ KdTree<D, R, A>::KdTree(A&& points, const Params& params):
   };
   
   // dimension tem que ser genérico dps!!
-  int dimension = 3;
-  vector<unsigned> indexVector;
-  indexVector.reserve(size);
+  size_t dimension = D;
+  vector<unsigned> indexVector(size);
 
   // inicializando vetor de índices
   // lembre-se que ele é útil pois não podemos alterar a ordem dos pontos! 
@@ -223,27 +225,43 @@ KdTree<D, R, A>::KdTree(A&& points, const Params& params):
       currentNode.isLeaf = false;
       
       // span pega intervalo [a;b[
-      // TODO: completar isso para que os filhos esejam de acordo com indexVector
       span leftIndexes{indexVector.begin() + begin, indexVector.begin() + median + 1};
       span rightIndexes{indexVector.begin() + median + 1, indexVector.begin() + end + 1};
-
-      // vector<typeof()>
-
+      
       size_t leftPointCount = median - begin + 1;
       size_t rightPointCount = end - median;
+
+      PointVector<D,R> left(leftPointCount);
+      PointVector<D,R> right(rightPointCount);
+
+      auto populateChildPointVector = [this](std::span<unsigned> indexVector, PointVector<D,R>& vector) {
+        transform(
+          indexVector.begin(),
+          indexVector.end(),
+          vector.begin(),
+          [&](int i) {
+            return this->points()[i];
+          }
+        );
+      };
+
+      populateChildPointVector(leftIndexes, left);
+      populateChildPointVector(rightIndexes, right);
       currentDepth++;
-    
-      // cout << "Left children: " << leftPointCount << ", depth: " << currentDepth << endl;
-      // for(auto& e : left) {
-      //   cout << e << " ";
-      // } 
-      // cout << endl;
+      
+      #ifdef DEBUG 
+      cout << "Left children: " << leftPointCount << ", depth: " << currentDepth << endl;
+      for(auto& e : left) {
+        cout << e << " ";
+      } 
+      cout << endl;
      
-      // cout << "Right children: " << rightPointCount << ", depth: " << currentDepth << endl;
-      // for(auto& e : right) {
-      //   cout << e << " ";
-      // } 
-      // cout << endl;
+      cout << "Right children: " << rightPointCount << ", depth: " << currentDepth << endl;
+      for(auto& e : right) {
+        cout << e << " ";
+      } 
+      cout << endl;
+      #endif
 
       currentNode.nodeData.children[0] = new Node{computeBounds<D, R>(left), currentDepth, leftPointCount, indexVector[begin]}; 
       currentNode.nodeData.children[1] = new Node{computeBounds<D, R>(right), currentDepth, rightPointCount, indexVector[median + 1]};

@@ -11,8 +11,8 @@ main()
   using R = float;
   using A = PointVector<D, R>;
 
-  // criando uma KdTree com 100 pontos
-  constexpr size_t np{5};
+  // criando uma KdTree com n pontos
+  constexpr size_t np{4};
   KdTree<D, R, A> tree{prand<D, R>(np)};
   auto& points = tree.points();
   auto& bounds = tree.bounds();
