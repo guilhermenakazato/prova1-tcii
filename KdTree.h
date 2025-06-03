@@ -214,7 +214,7 @@ KdTree<D, R, A>::KdTree(A&& points, const Params& params):
       std::nth_element(
         indexVector.begin() + begin, 
         indexVector.begin() + median, 
-        indexVector.begin() + end, 
+        indexVector.begin() + end + 1, 
         [this, currentDepth, dimension](unsigned a, unsigned b) {
           return this->points()[a][currentDepth % dimension] < this->points()[b][currentDepth % dimension];
         }
@@ -223,25 +223,27 @@ KdTree<D, R, A>::KdTree(A&& points, const Params& params):
       currentNode.isLeaf = false;
       
       // span pega intervalo [a;b[
-      span left{this->points().begin() + begin, this->points().begin() + median + 1};
-      span right{this->points().begin() + median + 1, this->points().begin() + end};
+      // TODO: completar isso para que os filhos esejam de acordo com indexVector
+      span leftIndexes{indexVector.begin() + begin, indexVector.begin() + median + 1};
+      span rightIndexes{indexVector.begin() + median + 1, indexVector.begin() + end + 1};
 
-      
+      // vector<typeof()>
+
       size_t leftPointCount = median - begin + 1;
-      size_t rightPointCount = end - median - 1;
+      size_t rightPointCount = end - median;
       currentDepth++;
-      
-      cout << "Left children indexes, depth: " << currentDepth << endl;
-      for(auto& e : left) {
-        cout << e << " ";
-      } 
-      cout << endl;
+    
+      // cout << "Left children: " << leftPointCount << ", depth: " << currentDepth << endl;
+      // for(auto& e : left) {
+      //   cout << e << " ";
+      // } 
+      // cout << endl;
      
-      cout << "Right children, depth: " << currentDepth << endl;
-      for(auto& e : right) {
-        cout << e << " ";
-      } 
-      cout << endl;
+      // cout << "Right children: " << rightPointCount << ", depth: " << currentDepth << endl;
+      // for(auto& e : right) {
+      //   cout << e << " ";
+      // } 
+      // cout << endl;
 
       currentNode.nodeData.children[0] = new Node{computeBounds<D, R>(left), currentDepth, leftPointCount, indexVector[begin]}; 
       currentNode.nodeData.children[1] = new Node{computeBounds<D, R>(right), currentDepth, rightPointCount, indexVector[median + 1]};
@@ -253,7 +255,7 @@ KdTree<D, R, A>::KdTree(A&& points, const Params& params):
     }
   };
 
-  buildTree(0, size, 0, *_root);
+  buildTree(0, size - 1, 0, *_root);
 }
 
 // implementação de findNeighbors
