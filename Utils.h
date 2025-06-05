@@ -21,8 +21,6 @@ computeBounds(const A& points)
   return b;
 }
 
-// distância de um ponto pra AABB
-// não entendi a utilidade
 template <size_t D, IsReal R>
 auto
 distance(const Vec<D, R>& p, const Bounds<D, R>& bounds)
