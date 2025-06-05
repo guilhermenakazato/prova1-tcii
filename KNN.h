@@ -52,7 +52,7 @@ public:
   {
       return heap;
   }
-
+  
   void sort() {
     std::sort_heap(heap.begin(), heap.end(), cmp);
   }

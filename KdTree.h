@@ -252,27 +252,16 @@ KdTree<D, R, A>::findNeighbors(const Point& point,
   unsigned k,
   PointFunc filter) const -> KNN
 {
+  /**
+   * um ponto pode ter, no máximo, n - 1 vizinhos.
+   * a heap e o KNN parecem funcionar perfeitamente mesmo se k >= n
+   * porém, não consegui fazer o sort funcionar corretamente
+   * vale a pena arrumar esse "bug" ou será que só o assert já tá bom?
+   */
+
+  assert(k < this->points().size());
   using namespace std;
   KNN knn{k};
-
-  auto euclidianDistance = [](const Point& a, const Point& b) {
-    R distance{};
-    
-    for (size_t i = 0; i < D; ++i)
-    distance += std::pow(a[i] - b[i], 2);
-    
-    return (R)std::sqrt(distance);
-  };
-
-  // dá pra transformar em op==, acho...
-  auto pointIsEqual = [](const Point& a, const Point& b) {
-    for(size_t i = 0; i < D; i++) {
-      if(a[i] != b[i])
-        return false;
-    }
-
-    return true;
-  };
   
   std::function<void(const Node&)> traverse;
   traverse = [&](const Node& currentNode) {
@@ -284,14 +273,15 @@ KdTree<D, R, A>::findNeighbors(const Point& point,
         int elementIndex = indexVector[firstPoint + i];
         Point currentPoint = this->points()[elementIndex];
         
+        // é pra ser !filter ou só filter mesmo..... (depois da checagem pra ver se o filter existe)
         if(filter && filter(this->points(), elementIndex))
           continue;
 
         // se o ponto no índice atual for o próprio ponto recebido pela função, ignorar
-        if(pointIsEqual(currentPoint, point))
+        if(point == currentPoint)
           continue;
         
-        knn.add(euclidianDistance(point, currentPoint), elementIndex);
+        knn.add(distance<D,R>(point, currentPoint), elementIndex);
       }
     } else {
       // algoritmo do prof. Pagliosa
@@ -336,6 +326,9 @@ KdTree<D, R, A>::findNeighbors(const Point& point,
   return knn;
 }
 
+/**
+ * não tem que ser em ordem de acordo com a distância, né?
+ */
 // implementação de forEachNeighbor
 template <size_t D, typename R, typename A>
 void
@@ -344,7 +337,63 @@ KdTree<D, R, A>::forEachNeighbor(const Point& point,
   PointFunc f,
   PointFunc filter) const
 {
-  f(this->points(), 0);
+  using namespace std;
+  
+  std::function<void(const Node&)> traverse;
+  traverse = [&](const Node& currentNode) {
+    if(currentNode.isLeaf) {
+      unsigned firstPoint = currentNode.nodeData.leafData.firstPoint;
+      size_t pointCount = currentNode.nodeData.leafData.pointCount;
+      
+      for(int i = 0; i < pointCount; i++) {
+        int elementIndex = indexVector[firstPoint + i];
+        Point currentPoint = this->points()[elementIndex];
+        
+        // é pra ser !filter ou só filter mesmo..... (depois da checagem pra ver se o filter existe)
+        if(filter && filter(this->points(), elementIndex))
+          continue;
+
+        // se o ponto no índice atual for o próprio ponto recebido pela função, ignorar
+        if(point == currentPoint)
+          continue;
+        
+        if(distance<D,R>(point, currentPoint) <= radius) {
+          if(!f(this->points(), elementIndex))
+            return;
+        }
+
+      }
+    } else {
+      // algoritmo do prof. Pagliosa
+      int dimension = currentNode.depth % D;
+      R d0 = distance<D, R>(point, currentNode.nodeData.children[0]->bounds);
+      R d1 = distance<D, R>(point, currentNode.nodeData.children[1]->bounds);
+      
+      /**
+       * só ignorar o lado se a distância do ponto pro bound do nó for maior que 
+       * a pior distância em KNN.neighbours() e KNN estiver cheio
+       * tá certo isso que eu disse...?
+       */
+      if (d0 < d1) {
+        if (d0 > radius)
+          return;
+        traverse(*currentNode.nodeData.children[0]);
+        if (d1 > radius)
+          return;
+        traverse(*currentNode.nodeData.children[1]);
+      } else {
+        if (d1 > radius) 
+          return;
+        traverse(*currentNode.nodeData.children[0]);
+        if (d0 > radius)
+          return;
+        traverse(*currentNode.nodeData.children[1]);
+      }
+    }
+
+  };
+
+  traverse(*_root);
 }
 
 template <typename R, typename A> using KdTree3 = KdTree<3, R, A>;

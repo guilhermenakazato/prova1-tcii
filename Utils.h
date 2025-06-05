@@ -35,6 +35,17 @@ distance(const Vec<D, R>& p, const Bounds<D, R>& bounds)
   return (R)std::sqrt(d);
 }
 
+template<size_t D, IsReal R>
+auto 
+distance(const Vec<D,R>& a, const Vec<D,R>& b) {
+  R d{};
+
+  for (size_t i = 0; i < D; ++i)
+    d += std::pow(a[i] - b[i], 2);
+  
+  return (R)std::sqrt(d);
+}
+
 // retorna um número real entre 0 e 1 
 template <IsReal R>
 inline auto

@@ -28,19 +28,20 @@ main()
   std::cout << "Tree bounds: " << bounds << '\n';
   std::cout << "Points: " << points.size() << '\n';
 
+  // pra q serve isso
   R d{};
-
   for (unsigned i = 0; i < np; ++i)
     d += distance(points[i], bounds);
   std::cout << "Distance sum: " << d << '\n';
 
   // n vizinhos do ponto no índice 0 e imprimindo aqueles em um raio 
-  (void)tree.findNeighbors(0, 1);
+  (void)tree.findNeighbors(0, 3);
   tree.forEachNeighbor(0, 
    2.f,
    [](const A& points, unsigned index)
    {
      std::cout << points[index] << '\n';
+
      return true;
    });
 
