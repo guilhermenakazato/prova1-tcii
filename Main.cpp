@@ -17,39 +17,42 @@ using namespace tcii::cg;
 int
 main()
 {
-	//constexpr size_t D{ 3 };
-	//using R = float;
-	//using A = PointVector<D, R>;
+	constexpr size_t D{ 3 };
+	using R = float;
+	using A = PointVector<D, R>;
 
-	//// criando uma KdTree com n pontos
-	//constexpr size_t np{ 5 };
-	//KdTree<D, R, A> tree{ prand<D, R>(np) };
-	//auto& points = tree.points();
-	//auto& bounds = tree.bounds();
+	// criando uma KdTree com n pontos
+	constexpr size_t np{ 5 };
+	KdTree<D, R, A> tree{ prand<D, R>(np) };
+	auto& points = tree.points();
+	auto& bounds = tree.bounds();
 
-	//std::cout.precision(3);
-	//std::cout << "Tree bounds: " << bounds << '\n';
-	//std::cout << "Points: " << points.size() << '\n';
+	std::cout.precision(3);
+	std::cout << "Tree bounds: " << bounds << '\n';
+	std::cout << "Points: " << points.size() << '\n';
 
-	//// pra q serve isso
-	//R d{};
-	//for (unsigned i = 0; i < np; ++i)
-	//	d += distance(points[i], bounds);
-	//std::cout << "Distance sum: " << d << '\n';
+	// pra q serve isso
+	R d{};
+	for (unsigned i = 0; i < np; ++i)
+		d += distance(points[i], bounds);
+	std::cout << "Distance sum: " << d << '\n';
 
-	//// n vizinhos do ponto no índice 0 e imprimindo aqueles em um raio 
-	//(void)tree.findNeighbors(0, 3);
-	//tree.forEachNeighbor(0,
-	//	2.f,
-	//	[](const A& points, unsigned index)
-	//	{
-	//		std::cout << points[index] << '\n';
+	// n vizinhos do ponto no índice 0 e imprimindo aqueles em um raio 
+	(void)tree.findNeighbors(0, 4);
+	tree.forEachNeighbor(
+		0,
+		2.f,
+		[](const A& points, unsigned index)
+		{
+			return true;
+		},
+		[](const A& points, unsigned index) {
+			return points[index][1] > 0.300f;
+		}	
+	);
 
-	//		return true;
-	//	});
 
-
-	///////////////////////////////////////////////////////Particle System
+	/////////////////////////////////////////////////////// Particle System
 	//auto ps = ParticleSystem<Vec3f>::New();
 
 	//ps->setParticleBuffer(1000);
@@ -87,7 +90,7 @@ main()
 
 	/////////////////////////////////////////////////////// Heap
 	  // KNN<float> heap{7};
-	  //   heap.add(100.0f, 0);
+	  // heap.add(100.0f, 0);
 	  // heap.add(50.0f, 1);
 	  // heap.add(75.0f, 4);
 	  // heap.add(25.0f, 6);

@@ -272,13 +272,12 @@ KdTree<D, R, A>::findNeighbors(const Point& point,
       for(int i = 0; i < pointCount; i++) {
         int elementIndex = indexVector[firstPoint + i];
         Point currentPoint = this->points()[elementIndex];
-        
-        // é pra ser !filter ou só filter mesmo..... (depois da checagem pra ver se o filter existe)
-        if(filter && filter(this->points(), elementIndex))
-          continue;
-
+                
         // se o ponto no índice atual for o próprio ponto recebido pela função, ignorar
         if(point == currentPoint)
+        continue;
+
+        if(filter && !filter(this->points(), elementIndex))
           continue;
         
         knn.add(distance<D,R>(point, currentPoint), elementIndex);
@@ -349,14 +348,17 @@ KdTree<D, R, A>::forEachNeighbor(const Point& point,
         int elementIndex = indexVector[firstPoint + i];
         Point currentPoint = this->points()[elementIndex];
         
-        // é pra ser !filter ou só filter mesmo..... (depois da checagem pra ver se o filter existe)
-        if(filter && filter(this->points(), elementIndex))
-          continue;
-
         // se o ponto no índice atual for o próprio ponto recebido pela função, ignorar
         if(point == currentPoint)
-          continue;
+        continue;
         
+        // só os pontos que satisfazem a condição de filter são aceitos
+        if(filter && !filter(this->points(), elementIndex)) {
+          cout << "Entrei!" << endl;
+          continue;
+        }
+        
+        cout << "Ponto a ser checado: " << currentPoint << endl;
         if(distance<D,R>(point, currentPoint) <= radius) {
           if(!f(this->points(), elementIndex))
             return;
