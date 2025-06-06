@@ -275,7 +275,7 @@ KdTree<D, R, A>::findNeighbors(const Point& point,
                 
         // se o ponto no índice atual for o próprio ponto recebido pela função, ignorar
         if(point == currentPoint)
-        continue;
+          continue;
 
         if(filter && !filter(this->points(), elementIndex))
           continue;
@@ -337,9 +337,11 @@ KdTree<D, R, A>::forEachNeighbor(const Point& point,
   PointFunc filter) const
 {
   using namespace std;
+  bool shouldStop = false;
   
   std::function<void(const Node&)> traverse;
   traverse = [&](const Node& currentNode) {
+    if(shouldStop) return;
     if(currentNode.isLeaf) {
       unsigned firstPoint = currentNode.nodeData.leafData.firstPoint;
       size_t pointCount = currentNode.nodeData.leafData.pointCount;
@@ -353,15 +355,13 @@ KdTree<D, R, A>::forEachNeighbor(const Point& point,
         continue;
         
         // só os pontos que satisfazem a condição de filter são aceitos
-        if(filter && !filter(this->points(), elementIndex)) {
-          cout << "Entrei!" << endl;
+        if(filter && !filter(this->points(), elementIndex)) 
           continue;
-        }
         
-        cout << "Ponto a ser checado: " << currentPoint << endl;
         if(distance<D,R>(point, currentPoint) <= radius) {
-          if(!f(this->points(), elementIndex))
-            return;
+          if(!f(this->points(), elementIndex)) {
+            shouldStop = true;
+          }
         }
 
       }

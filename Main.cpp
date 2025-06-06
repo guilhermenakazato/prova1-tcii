@@ -44,7 +44,7 @@ main()
 		2.f,
 		[](const A& points, unsigned index)
 		{
-			return true;
+			return points[index][0] > 0.350f;
 		},
 		[](const A& points, unsigned index) {
 			return points[index][1] > 0.300f;
