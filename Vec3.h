@@ -52,6 +52,18 @@ operator +(const Vec3<real>& u, const Vec3<real>& v)
   return {u.x + v.x, u.y + v.y, u.z + v.z};
 }
 
+template <typename real> 
+inline bool
+operator ==(const Vec3<real>& u, const Vec3<real>& v) 
+{
+  for(size_t i = 0; i < 3; i++) {
+    if(u[i] != v[i])
+      return false;
+  }
+
+  return true;
+}
+
 template <typename real>
 inline Vec3<real>
 operator -(const Vec3<real>& u, const Vec3<real>& v)

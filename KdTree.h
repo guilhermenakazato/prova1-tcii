@@ -30,14 +30,6 @@ public:
     return _points;
   }
 
-  // auto begin() const {
-  //   return _points;
-  // }
-
-  // auto end() const {
-  //   return _points + points.size();
-  // }
-
 private:
   A _points;
 
@@ -149,11 +141,11 @@ private:
       Node* children[2];
       struct {
         size_t pointCount;
-        unsigned firstPoint;
+        size_t firstPoint;
       } leafData;
     } nodeData;
 
-    Node(const Bounds& bounds, unsigned depth, size_t pointCount, unsigned firstPoint):
+    Node(const Bounds& bounds, unsigned depth, size_t pointCount, size_t firstPoint):
       bounds{bounds}, 
       depth{depth}
     {
@@ -166,7 +158,7 @@ private:
   Node* _root{};
   unsigned _nodeCount{};
   unsigned _leafCount{};
-
+  vector<unsigned> indexVector;
 }; // KdTree
 
 // construção da KdTree
@@ -175,16 +167,6 @@ KdTree<D, R, A>::KdTree(A&& points, const Params& params):
   Base{std::move(points)},
   params{params}
 {
-  std::cout.precision(3);
-
-  #ifdef DEBUG
-  cout << "Original points" << endl;
-  for(auto i = this->points().begin(); i != this->points().end(); i++) {
-    cout << *i << " ";
-  }
-  cout << endl;
-  #endif
-
   auto size = this->points().size();
   _root = new Node{computeBounds<D, R>(this->points()), 0, size, 0};
   _nodeCount = _leafCount = 1;
@@ -195,17 +177,16 @@ KdTree<D, R, A>::KdTree(A&& points, const Params& params):
     return leafPointCount > params.maxPointsPerNode && leaf.depth < params.maxDepth;
   };
   
-  // dimension tem que ser genérico dps!!
   size_t dimension = D;
-  vector<unsigned> indexVector(size);
 
   // inicializando vetor de índices
   // lembre-se que ele é útil pois não podemos alterar a ordem dos pontos! 
+  indexVector.reserve(size);
   for(int i = 0; i < size; i++) {
     indexVector[i] = i;
   }
-
-  // definindo a função pra poder fazer recursivo...
+ 
+  // definindo a função pra poder fazer recursivo... (que feio!)
   std::function<void(size_t, size_t, unsigned int, Node&)> buildTree;
   buildTree = [&](size_t begin, size_t end, unsigned currentDepth, Node& currentNode) {
     Node& aux = currentNode;
@@ -248,26 +229,14 @@ KdTree<D, R, A>::KdTree(A&& points, const Params& params):
       populateChildPointVector(leftIndexes, left);
       populateChildPointVector(rightIndexes, right);
       currentDepth++;
-      
-      #ifdef DEBUG 
-      cout << "Left children: " << leftPointCount << ", depth: " << currentDepth << endl;
-      for(auto& e : left) {
-        cout << e << " ";
-      } 
-      cout << endl;
-     
-      cout << "Right children: " << rightPointCount << ", depth: " << currentDepth << endl;
-      for(auto& e : right) {
-        cout << e << " ";
-      } 
-      cout << endl;
-      #endif
 
-      currentNode.nodeData.children[0] = new Node{computeBounds<D, R>(left), currentDepth, leftPointCount, indexVector[begin]}; 
-      currentNode.nodeData.children[1] = new Node{computeBounds<D, R>(right), currentDepth, rightPointCount, indexVector[median + 1]};
+      // to com duvidas na modelagem nessa parte.....
+      // ver com o Jun dps...... antes tava indexVector[begin] e indexVector[median+1]
+      currentNode.nodeData.children[0] = new Node{computeBounds<D, R>(left), currentDepth, leftPointCount, begin}; 
+      currentNode.nodeData.children[1] = new Node{computeBounds<D, R>(right), currentDepth, rightPointCount, median + 1};
       _nodeCount += 2;
       _leafCount++;
-      
+
       buildTree(begin, median, currentDepth, *currentNode.nodeData.children[0]);
       buildTree(median + 1, end, currentDepth, *currentNode.nodeData.children[1]);
     }
@@ -283,12 +252,83 @@ KdTree<D, R, A>::findNeighbors(const Point& point,
   unsigned k,
   PointFunc filter) const -> KNN
 {
-  KNN knn{k};
+  /**
+   * um ponto pode ter, no máximo, n - 1 vizinhos.
+   * a heap e o KNN parecem funcionar perfeitamente mesmo se k >= n
+   * porém, não consegui fazer o sort funcionar corretamente
+   * vale a pena arrumar esse "bug" ou será que só o assert já tá bom?
+   */
 
-  // TODO
+  assert(k < this->points().size());
+  using namespace std;
+  KNN knn{k};
+  
+  std::function<void(const Node&)> traverse;
+  traverse = [&](const Node& currentNode) {
+    if(currentNode.isLeaf) {
+      unsigned firstPoint = currentNode.nodeData.leafData.firstPoint;
+      size_t pointCount = currentNode.nodeData.leafData.pointCount;
+      
+      for(int i = 0; i < pointCount; i++) {
+        int elementIndex = indexVector[firstPoint + i];
+        Point currentPoint = this->points()[elementIndex];
+        
+        // é pra ser !filter ou só filter mesmo..... (depois da checagem pra ver se o filter existe)
+        if(filter && filter(this->points(), elementIndex))
+          continue;
+
+        // se o ponto no índice atual for o próprio ponto recebido pela função, ignorar
+        if(point == currentPoint)
+          continue;
+        
+        knn.add(distance<D,R>(point, currentPoint), elementIndex);
+      }
+    } else {
+      // algoritmo do prof. Pagliosa
+      int dimension = currentNode.depth % D;
+      R d0 = distance<D, R>(point, currentNode.nodeData.children[0]->bounds);
+      R d1 = distance<D, R>(point, currentNode.nodeData.children[1]->bounds);
+      
+      /**
+       * só ignorar o lado se a distância do ponto pro bound do nó for maior que 
+       * a pior distância em KNN.neighbours() e KNN estiver cheio
+       * tá certo isso que eu disse...?
+       */
+      if (d0 < d1) {
+        if (d0 > knn.getMaxDist() && knn.isFull())
+          return;
+        traverse(*currentNode.nodeData.children[0]);
+        if (d1 > knn.getMaxDist() && knn.isFull())
+          return;
+        traverse(*currentNode.nodeData.children[1]);
+      } else {
+        if (d1 > knn.getMaxDist() && knn.isFull()) 
+          return;
+        traverse(*currentNode.nodeData.children[0]);
+        if (d0 > knn.getMaxDist() && knn.isFull())
+          return;
+        traverse(*currentNode.nodeData.children[1]);
+      }
+    }
+
+  };
+
+  traverse(*_root);
+  
+  knn.sort();
+  for(int i = 0; i < knn.neighbors().size(); i++) {
+    int neighborIndex = knn.neighbors()[i].second;
+
+    cout << "Vizinho " << (i + 1) << ": " << this->points()[neighborIndex] << endl;
+    cout << "Distância do vizinho pro ponto: " << knn.neighbors()[i].first << endl << endl;
+  }
+
   return knn;
 }
 
+/**
+ * não tem que ser em ordem de acordo com a distância, né?
+ */
 // implementação de forEachNeighbor
 template <size_t D, typename R, typename A>
 void
@@ -297,8 +337,63 @@ KdTree<D, R, A>::forEachNeighbor(const Point& point,
   PointFunc f,
   PointFunc filter) const
 {
-  f(this->points(), 0);
-  // TODO
+  using namespace std;
+  
+  std::function<void(const Node&)> traverse;
+  traverse = [&](const Node& currentNode) {
+    if(currentNode.isLeaf) {
+      unsigned firstPoint = currentNode.nodeData.leafData.firstPoint;
+      size_t pointCount = currentNode.nodeData.leafData.pointCount;
+      
+      for(int i = 0; i < pointCount; i++) {
+        int elementIndex = indexVector[firstPoint + i];
+        Point currentPoint = this->points()[elementIndex];
+        
+        // é pra ser !filter ou só filter mesmo..... (depois da checagem pra ver se o filter existe)
+        if(filter && filter(this->points(), elementIndex))
+          continue;
+
+        // se o ponto no índice atual for o próprio ponto recebido pela função, ignorar
+        if(point == currentPoint)
+          continue;
+        
+        if(distance<D,R>(point, currentPoint) <= radius) {
+          if(!f(this->points(), elementIndex))
+            return;
+        }
+
+      }
+    } else {
+      // algoritmo do prof. Pagliosa
+      int dimension = currentNode.depth % D;
+      R d0 = distance<D, R>(point, currentNode.nodeData.children[0]->bounds);
+      R d1 = distance<D, R>(point, currentNode.nodeData.children[1]->bounds);
+      
+      /**
+       * só ignorar o lado se a distância do ponto pro bound do nó for maior que 
+       * a pior distância em KNN.neighbours() e KNN estiver cheio
+       * tá certo isso que eu disse...?
+       */
+      if (d0 < d1) {
+        if (d0 > radius)
+          return;
+        traverse(*currentNode.nodeData.children[0]);
+        if (d1 > radius)
+          return;
+        traverse(*currentNode.nodeData.children[1]);
+      } else {
+        if (d1 > radius) 
+          return;
+        traverse(*currentNode.nodeData.children[0]);
+        if (d0 > radius)
+          return;
+        traverse(*currentNode.nodeData.children[1]);
+      }
+    }
+
+  };
+
+  traverse(*_root);
 }
 
 template <typename R, typename A> using KdTree3 = KdTree<3, R, A>;

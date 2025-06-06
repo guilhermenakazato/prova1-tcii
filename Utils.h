@@ -21,8 +21,6 @@ computeBounds(const A& points)
   return b;
 }
 
-// distância de um ponto pra AABB
-// não entendi a utilidade
 template <size_t D, IsReal R>
 auto
 distance(const Vec<D, R>& p, const Bounds<D, R>& bounds)
@@ -34,6 +32,17 @@ distance(const Vec<D, R>& p, const Bounds<D, R>& bounds)
       d += t * t;
     else if (auto t = p[i] - bounds[1][i]; t > 0)
       d += t * t;
+  return (R)std::sqrt(d);
+}
+
+template<size_t D, IsReal R>
+auto 
+distance(const Vec<D,R>& a, const Vec<D,R>& b) {
+  R d{};
+
+  for (size_t i = 0; i < D; ++i)
+    d += std::pow(a[i] - b[i], 2);
+  
   return (R)std::sqrt(d);
 }
 

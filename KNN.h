@@ -20,7 +20,7 @@ public:
   {
       if (heap.size() < _k)
       {
-          // A heap n„o est· cheia, colocamos um candidato
+          // A heap n√£o est√° cheia, colocamos um candidato
           heap.emplace_back(distance, index);
 
           // A partir do momento que temos todos os candidatos, montamos a heap
@@ -28,35 +28,39 @@ public:
               std::make_heap(heap.begin(), heap.end(), cmp);
       }
 
-      else if (distance < heap.front().first) // O novo candidato È melhor que o pior
+      else if (distance < heap.front().first) // O novo candidato √© melhor que o pior
       {
           // Remove o pior elemento (propriedade Max Heap)
           std::pop_heap(heap.begin(), heap.end(), cmp);
 
-          // Colocamos o novo candidato em uma posiÁ„o para chamar o Heapify
+          // Colocamos o novo candidato em uma posi√ß√£oo para chamar o Heapify
           heap.back() = { distance, index };
 
-          // MantÈm a propriedade da Heap
+          // Mant√©m a propriedade da Heap
           std::push_heap(heap.begin(), heap.end(), cmp);
       }
   }
 
-  // Auxiliar para verificar se a heap est· cheia
+  // Auxiliar para verificar se a heap est√° cheia
   bool isFull() const { return heap.size() == _k; }
 
-  // Auxiliar para obter a pior dist‚ncia
-  R getMaxDist() const { return heap.front().first; }
+  // Auxiliar para obter a pior dist√¢ncia
+  R getMaxDist() const { return !heap.empty() ? heap.front().first : 999999; }
 
-  // Retorna referÍncia constante ao heap (n„o ordenado)
+  // Retorna refer√™ncia constante ao heap (n√£o ordenado)
   const std::vector<std::pair<R, unsigned>>& neighbors() const 
   {
       return heap;
+  }
+  
+  void sort() {
+    std::sort_heap(heap.begin(), heap.end(), cmp);
   }
 
 private:
     unsigned _k;
 
-    // Nossa heap È um vector de dados que armazeam a dist‚ncia e o Ìndice de um ponto
+    // Nossa heap √© um vector de dados que armazeam a dist√¢ncia e o √≠ndice de um ponto
     std::vector<std::pair<R, unsigned>> heap;
 
     static bool cmp(const std::pair<R, unsigned>& a, const std::pair<R, unsigned>& b) { return a.first < b.first; }
