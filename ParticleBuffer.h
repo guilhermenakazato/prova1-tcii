@@ -61,12 +61,18 @@ public:
 	  _particleCount = 0;
   }
 
-  // Adicionada para facilitar a implementacao de [] em ParticleArray
-  auto 
-  get(unsigned index) const
+  auto& 
+  position(unsigned index) const
   {
-      return _soa.tuple(index);
+      return _soa.template get<0>(index);
   }
+
+  auto&
+  color(unsigned index) const
+  {
+	  return _soa.template get<1>(index);
+  }
+
 
   Bounds3f bounds() const;
   void render(Renderer&) const;

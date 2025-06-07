@@ -3,7 +3,7 @@
 
 #include "Bounds3.h"
 #include "Concepts.h"
-#include "ParticleArray.h"
+#include "ParticleKdTree.h"
 #include <vector>
 
 namespace tcii::p1
@@ -92,12 +92,12 @@ prand(size_t n, R min = 0, R max = 1)
   return v;
 }
 
-// filter(Pontos<coord, cor>, i, cor) -> bool
-bool
-filter(const ParticleArray<Vec3f>&A, unsigned i, Vec3f C)
-{
-return std::get<1>(A[i]) == C;
-}
+    //filter(Pontos<coord, cor>, i, cor) -> bool
+    bool
+    filter(const ParticleArray<Vec3f>&A, unsigned i, Vec3f C)
+    {
+        return A.color(i) == C;
+    }
 
 // especialização pra 3D
 template <typename R> using Points3 = PointVector<3, R>;

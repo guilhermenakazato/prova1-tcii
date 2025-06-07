@@ -3,7 +3,6 @@
 
 #include "Actor.h"
 #include "ParticleBuffer.h"
-#include "ParticleArray.h"
 
 namespace tcii::physx
 { // begin namespace tcii::physx

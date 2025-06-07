@@ -32,6 +32,11 @@ public:
     return _particles->position(unsigned(i));
   }
 
+  auto& color(size_t i) const
+  {
+    return _particles->color(unsigned(i));
+  }
+
 private:
   using PA = ParticleBuffer<Fields...>;
 
@@ -39,8 +44,8 @@ private:
 
 }; // ParticleArray
 
-template <typename... Fields>
-using ParticleKdTree = KdTree3<float, ParticleArray<Fields...>>;
+//template <typename... Fields>
+//using ParticleKdTree = KdTree3<float, ParticleArray<Fields...>>;
 
 } // end namespace tcii::p1
 
