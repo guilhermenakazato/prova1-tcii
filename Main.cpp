@@ -1,11 +1,6 @@
-#include "KdTree.h"
-#include "Utils.h"
-#include "KNN.h"
-#include "ParticleSystem.h"
-#include "NameableObject.h"
 #include "ParticleKdTree.h"
+#include "NameableObject.h"
 #include "Renderer.h"
-#include "Utils.h"
 #include "Vec2.h"
 #include "Bounds2.h"
 #include <cstdio>
@@ -53,8 +48,8 @@ int main()
 	using A = PointVector<D, R>;
 	constexpr unsigned np{5};
 
+	// KdTree<2, float, PointVector<D,R>>
 	testTree(KdTree<D, R, A>{prand<D, R>(np)});
-
 	auto ps = ParticleSystem<Vec3f, Vec3f>::New();
 
 	ps->setParticleBuffer(np);
@@ -67,30 +62,31 @@ int main()
 	testTree(std::move(tree));
 
 	/////////////////////////////////////////////////////// Particle System
-	// auto ps = ParticleSystem<Vec3f>::New();
+	 auto ps = ParticleSystem<Vec3f>::New();
 
-	// ps->setParticleBuffer(1000);
+	 ps->setParticleBuffer(1000);
 
-	// auto pb = ps->particles();
+	 auto pb = ps->particles();
 
-	// pb->add(Vec3f{ 1.0f, 1.5f, 2.0f }, Vec3f{ 123.0f, 456.0f, 678.0f});
-	// pb->add(Vec3f{ 2.5f, 3.0f, 3.5f }, Vec3f(111.0f, 222.0f, 444.0f));
-	// pb->add(Vec3f{ 4.0f, 4.5f, 5.0f }, Vec3f(333.0f, 666.0f, 999.0f));
+	 pb->add(Vec3f{ 1.0f, 1.5f, 2.0f }, Vec3f{ 123.0f, 456.0f, 678.0f});
+	 pb->add(Vec3f{ 2.5f, 3.0f, 3.5f }, Vec3f(111.0f, 222.0f, 444.0f));
+	 pb->add(Vec3f{ 4.0f, 4.5f, 5.0f }, Vec3f(333.0f, 666.0f, 999.0f));
 
-	// auto pc = pb->particleCount();
+	 auto pc = pb->particleCount();
 
-	// printf("%s (capacity: %d)\n", ps->name(), pb->capacity());
-	// std::cout << "Particles: " << pc << "\nBounds: ";
-	//(pc ? std::cout << ps->bounds() : std::cout << "<empty>") << '\n';
+	 printf("%s (capacity: %d)\n", ps->name(), pb->capacity());
+	 std::cout << "Particles: " << pc << "\nBounds: ";
+	(pc ? std::cout << ps->bounds() : std::cout << "<empty>") << '\n';
 
-	// ParticleArray<Vec3f> pa(*ps); // constructor
-	// std::cout << "Testing ParticleArray:\n";
-	// for (auto i = 0u; i < pa.size(); i++) // .size() and operator[]()
-	//{
-	//	std::cout << "Particle Position: " << std::get<0>(pa[i]) << " of RGB " << std::get<1>(pa[i]) << '\n'; // Talvez corrigir o jeito que chama
-	// }
-	// std::cout << "Filter on particle 0 (should be true): " << filter(pa, 0, { 123.0f, 456.0f, 678.0f }) << std::endl;
-	// std::cout << "Filter on particle 1 (should be false): " << filter(pa, 1, { 123.0f, 456.0f, 678.0f }) << std::endl;
+	 ParticleArray<Vec3f> pa(*ps); // constructor
+	 std::cout << "Testing ParticleArray:\n";
+
+	 for (auto i = 0u; i < pa.size(); i++) // .size() and operator[]()
+	 {
+		 std::cout << "Particle Position: " << pa[i] << " of RGB " << pa.color(i) << '\n'; // Talvez corrigir o jeito que chama
+	 }
+	 std::cout << "Filter on particle 0 (should be true): " << filter(pa, 0, { 123.0f, 456.0f, 678.0f }) << std::endl;
+	 std::cout << "Filter on particle 1 (should be false): " << filter(pa, 1, { 123.0f, 456.0f, 678.0f }) << std::endl;
 
 	// for (size_t i = 0; i < 7; ++i)
 	//{

@@ -32,15 +32,23 @@ public:
     return _particles->position(unsigned(i));
   }
 
-private:
+  auto& color(size_t i) const
+  {
+    return _particles->color(unsigned(i));
+  }
+
+  bool filter(const ParticleArray<Vec3f>& arr, unsigned i, const Vec3f& color) {
+    return arr.color(i) == color;
+  }
+private:  
   using PA = ParticleBuffer<Fields...>;
 
   ObjectPtr<PA> _particles;
 
 }; // ParticleArray
 
-template <typename... Fields>
-using ParticleKdTree = KdTree3<float, ParticleArray<Fields...>>;
+//template <typename... Fields>
+//using ParticleKdTree = KdTree3<float, ParticleArray<Fields...>>;
 
 } // end namespace tcii::p1
 

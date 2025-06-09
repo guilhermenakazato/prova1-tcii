@@ -315,12 +315,12 @@ KdTree<D, R, A>::findNeighbors(const Point& point,
   traverse(*_root);
   
   knn.sort();
-  for(int i = 0; i < knn.neighbors().size(); i++) {
-    int neighborIndex = knn.neighbors()[i].second;
+  //for(int i = 0; i < knn.neighbors().size(); i++) {
+  //  int neighborIndex = knn.neighbors()[i].second;
 
-    cout << "Vizinho " << (i + 1) << ": " << this->points()[neighborIndex] << endl;
-    cout << "Distância do vizinho pro ponto: " << knn.neighbors()[i].first << endl << endl;
-  }
+  //  cout << "Vizinho " << (i + 1) << ": " << this->points()[neighborIndex] << endl;
+  //  cout << "Distância do vizinho pro ponto: " << knn.neighbors()[i].first << endl << endl;
+  //}
 
   return knn;
 }
@@ -352,7 +352,7 @@ KdTree<D, R, A>::forEachNeighbor(const Point& point,
         
         // se o ponto no índice atual for o próprio ponto recebido pela função, ignorar
         if(point == currentPoint)
-        continue;
+          continue;
         
         // só os pontos que satisfazem a condição de filter são aceitos
         if(filter && !filter(this->points(), elementIndex)) 

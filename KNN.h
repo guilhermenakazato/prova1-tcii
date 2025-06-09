@@ -47,6 +47,8 @@ public:
   // Auxiliar para obter a pior distância
   R getMaxDist() const { return !heap.empty() ? heap.front().first : 999999; }
 
+  auto size() const { return heap.size(); }
+
   // Retorna referência constante ao heap (não ordenado)
   const std::vector<std::pair<R, unsigned>>& neighbors() const 
   {

@@ -3,9 +3,9 @@
 
 #include "Bounds3.h"
 #include "Concepts.h"
-#include "ParticleArray.h"
 #include <vector>
 
+class ParticleKdTree;
 namespace tcii::p1
 { // begin namespace tcii::p1
 using namespace cg;
@@ -90,13 +90,6 @@ prand(size_t n, R min = 0, R max = 1)
   for (size_t i = 0; i < n; ++i)
     v[i] = prand<D>(min, max);
   return v;
-}
-
-// filter(Pontos<coord, cor>, i, cor) -> bool
-bool
-filter(const ParticleArray<Vec3f>&A, unsigned i, Vec3f C)
-{
-return std::get<1>(A[i]) == C;
 }
 
 // especialização pra 3D
