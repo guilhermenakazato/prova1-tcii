@@ -13,7 +13,7 @@ namespace tcii::cg
     template <size_t D, typename real> struct Vec;
 
     template <typename real>
-    struct Vec<2, real> // Ajustado para 2 dimensões
+    struct Vec<2, real> // Ajustado para 2 dimensï¿½es
     {
         ASSERT_REAL(real, "Vec2: floating-point type expected"); // Nome Vec2
 
@@ -42,7 +42,7 @@ namespace tcii::cg
 
     }; // Nome Vec2 
 
-	template <typename real> using Vec2 = Vec<2, real>; // Ajustado para 2 dimensões
+	template <typename real> using Vec2 = Vec<2, real>; // Ajustado para 2 dimensï¿½es
 
     template <typename real>
     inline Vec2<real> // Tipo Vec2
@@ -55,7 +55,7 @@ namespace tcii::cg
     inline bool
 		operator ==(const Vec2<real>& u, const Vec2<real>& v) // Tipo Vec2
     {
-		for (size_t i = 0; i < 2; i++) { // Ajustado para 2 dimensões
+		for (size_t i = 0; i < 2; i++) { // Ajustado para 2 dimensï¿½es
             if (u[i] != v[i])
                 return false;
         }
@@ -86,7 +86,7 @@ namespace tcii::cg
 
     template <typename real>
     inline real
-        Vec<2, real>::length() const // Ajustado para 2 dimensões
+        Vec<2, real>::length() const // Ajustado para 2 dimensï¿½es
     {
 		return std::sqrt(x * x + y * y); // z removido
     }
@@ -103,4 +103,4 @@ namespace tcii::cg
 
 } // end namespace tcii::cg
 
-#endif // __Vec3_h
+#endif // __Vec2_h

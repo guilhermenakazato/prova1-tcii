@@ -20,7 +20,8 @@ void printing_points(KdTree<D,R,A>& tree) {
     std::cout << "\nPoint[index] [(position)] in (distance)\n";
     for (auto i = 0u; i < tree.points().size(); i++) {
         std::cout << "Point[" << i << "]" 
-            << " [" << tree.points()[i] << "]" << endl;
+            << " [" << tree.points()[i] << "] in (" 
+			<< distance<D, R>(tree.points()[0], tree.points()[i]) << ")\n";;
     }
 }
 
@@ -36,7 +37,7 @@ void printing_knn(const ParticleArray<Vec3f>& arr, const KNN<float>& knn) {
 
 template <size_t D, typename R, typename A>
 inline
-void printing_knn(auto& tree, const KNN<float>& knn) {
+void printing_knn(auto& tree, const KNN<R>& knn) {
     std::cout << "\nFound " << knn.size() << " neighbors.\n";
     for (auto i = 0u; i < knn.size(); i++) {
         std::cout << "Neighbor[" << i << "]" << " ["
@@ -268,18 +269,50 @@ inline void menu() {
     cout << "3 - Testar Particle KdTree com filtro e sem raio" << endl;
     cout << "4 - Testar Particle KdTree com filtro e com raio" << endl;
     cout << "5 - Testar a KdTree de pontos simples" << endl;
-    cout << "5 - Sair" << endl;
+    cout << "6 - Sair" << endl;
     cout << "Escolha: "; 
+}
+
+inline void testFunctions(int opt, int particles, int neighbors) {
+    switch(opt) {
+        case 1: 
+            random_nofilter_noradius(particles, neighbors, Vec3f{ 0.0f, 0.0f, 0.0f });
+            break;
+        case 2:
+            random_nofilter_radius(particles, neighbors, Vec3f{ 0.0f,0.0f,0.0f }, 2.0f);
+            break;
+        case 3: 
+            random_filter_noradius(particles, neighbors, Vec3f{ 0.0f,0.0f,0.0f }, Vec3f{ 0.0f, 1.0f, 0.0f });
+            break;
+        case 4: 
+            random_filter_radius(particles, neighbors, Vec3f{ 0.0f,0.0f,0.0f }, 2.0f, Vec3f{ 0.0f, 1.0f, 0.0f });
+            break;
+        case 5:
+            simpleKdTree<2, float>(particles, neighbors, 2.f);
+            break;
+        case 6: 
+        // Unreachable.
+            cout << "Tchau!" << endl;
+            break;
+        default: 
+            cout << "Escolha uma opção válida." << endl;
+            break;
+    }
 }
 
 int main() {
     int opt = 0;
 
-    while(opt != 6) {
+    while(true) {
         int neighbors, particles;
 
         menu();
         cin >> opt;
+
+        if(opt == 6) {
+            cout << "Tchau!" << endl;
+            break;
+        }
 
         cout << "\nEscolha a quantidade de partículas: ";
         cin >> particles; 
@@ -288,30 +321,10 @@ int main() {
         cin >> neighbors;
         (void) getchar();
 
-        cout << neighbors << " " << particles << endl;
-
-        switch(opt) {
-            case 1: 
-                random_nofilter_noradius(particles, neighbors, Vec3f{ 0.0f, 0.0f, 0.0f });
-                break;
-            case 2:
-                random_nofilter_radius(particles, neighbors, Vec3f{ 0.0f,0.0f,0.0f }, 2.0f);
-                break;
-            case 3: 
-                random_filter_noradius(particles, neighbors, Vec3f{ 0.0f,0.0f,0.0f }, Vec3f{ 0.0f, 1.0f, 0.0f });
-                break;
-            case 4: 
-                random_filter_radius(particles, neighbors, Vec3f{ 0.0f,0.0f,0.0f }, 2.0f, Vec3f{ 0.0f, 1.0f, 0.0f });
-                break;
-            case 5:
-                // não está pronto ainda!!
-                simpleKdTree<3, float>(particles, neighbors, 2.f);
-            case 6: 
-                cout << "Tchau!" << endl;
-                break;
-            default: 
-                cout << "Escolha uma opção válida." << endl;
-                break;
+        if(particles < neighbors) {
+            cout << "Não é possível ter um número de vizinhos maior que o número de partículas, tente novamente." << endl;
+        } else {
+            testFunctions(opt, particles, neighbors);
         }
     }
 

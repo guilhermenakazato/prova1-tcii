@@ -2,6 +2,8 @@
 #define __Utils_h
 
 #include "Bounds3.h"
+#include "Bounds2.h"
+
 #include "Concepts.h"
 #include <vector>
 
