@@ -6,6 +6,10 @@
 #include "SoA.h"
 #include "Renderer.h"
 
+/*
+Autor(es): Guilherme Fernandes Nakazato ; Felipe Jun Takahashi
+*/
+
 namespace tcii::physx
 { // begin namespace tcii::physx
 
@@ -61,18 +65,21 @@ public:
 	  _particleCount = 0;
   }
 
+  // Assume que a posição é o primeiro elemento da tupla
   auto& 
   position(unsigned index) const
   {
       return _soa.template get<0>(index);
   }
 
+  // Assume que a cor é o segundo elemento da tupla
   auto&
   color(unsigned index) const
   {
 	  return _soa.template get<1>(index);
   }
 
+  // Permite modificar para uma cor específica (usado em teste)
   void setColor(unsigned index, const Vec3f& color) {
 	  _soa.template get<1>(index) = color;
   }

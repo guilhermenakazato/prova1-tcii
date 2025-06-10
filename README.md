@@ -1,9 +1,22 @@
-# KD-Tree de Partículas
-É necessário executar o compilador com, pelo menos, C++20.
+# Autores
+Guilherme Fernandes Nakazato
+Felipe Jun Takahashi
+
+# Atividades
+- A1 (Finalizada)
+- A2 (Finalizada)
+- A3 (Finalizada)
+- A4 (Finalizada)
+- A5 (Finalizada)
+
+# Vídeo (Youtube)
+link: [Vídeo Prova Prática 1](https://www.youtube.com/watch?v=zIvqoGEAQj0)
+
+# Compilar
 ```
 g++ -std=c++20 *.h *.cpp
 ```
-Caso queira visualizar a construção da árvore, defina a variável DEBUG na compilação.
+
 ```
-g++ -std=c++20 -DTEST *.h *.cpp
+g++ -std=c++20 Main.cpp NameableObject.cpp
 ```

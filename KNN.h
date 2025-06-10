@@ -5,6 +5,10 @@
 #include <vector>
 #include <algorithm>
 
+/*
+Autor(es): Guilherme Fernandes Nakazato ; Felipe Jun Takahashi
+*/
+
 namespace tcii::p1
 { // begin namespace tcii::p1
 

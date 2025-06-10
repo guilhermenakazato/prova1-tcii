@@ -7,6 +7,10 @@
 #include <utility>
 #include <span>
 
+/*
+Autor(es): Guilherme Fernandes Nakazato ; Felipe Jun Takahashi
+*/
+
 namespace tcii::p1
 { // begin namespace tcii::p1
 
@@ -161,7 +165,9 @@ private:
   vector<unsigned> indexVector;
 }; // KdTree
 
-// construção da KdTree
+/*
+Construção da KD-Tree
+*/
 template <size_t D, typename R, typename A>
 KdTree<D, R, A>::KdTree(A&& points, const Params& params):
   Base{std::move(points)},
@@ -186,7 +192,7 @@ KdTree<D, R, A>::KdTree(A&& points, const Params& params):
     indexVector[i] = i;
   }
  
-  // definindo a função pra poder fazer recursivo... (que feio!)
+  // definindo a função pra poder fazer recursivo... 
   std::function<void(size_t, size_t, unsigned int, Node&)> buildTree;
   buildTree = [&](size_t begin, size_t end, unsigned currentDepth, Node& currentNode) {
     Node& aux = currentNode;
@@ -230,8 +236,6 @@ KdTree<D, R, A>::KdTree(A&& points, const Params& params):
       populateChildPointVector(rightIndexes, right);
       currentDepth++;
 
-      // to com duvidas na modelagem nessa parte.....
-      // ver com o Jun dps...... antes tava indexVector[begin] e indexVector[median+1]
       currentNode.nodeData.children[0] = new Node{computeBounds<D, R>(left), currentDepth, leftPointCount, begin}; 
       currentNode.nodeData.children[1] = new Node{computeBounds<D, R>(right), currentDepth, rightPointCount, median + 1};
       _nodeCount += 2;
@@ -241,23 +245,23 @@ KdTree<D, R, A>::KdTree(A&& points, const Params& params):
       buildTree(median + 1, end, currentDepth, *currentNode.nodeData.children[1]);
     }
   };
-
   buildTree(0, size - 1, 0, *_root);
 }
 
-// implementação de findNeighbors
+/*
+findNeighbors
+- Encontra os k vizinhos mais próximos de um ponto
+- Buscamos os candidatos quando encontramos uma folha
+- Utilizamos uma heap para armazenar os candidatos
+    - KNN.h
+- Comparação para determinar se vale a pena explorar os filhos
+*/
 template <size_t D, typename R, typename A>
 auto
 KdTree<D, R, A>::findNeighbors(const Point& point,
   unsigned k,
   PointFunc filter) const -> KNN
 {
-  /**
-   * um ponto pode ter, no máximo, n - 1 vizinhos.
-   * a heap e o KNN parecem funcionar perfeitamente mesmo se k >= n
-   * porém, não consegui fazer o sort funcionar corretamente
-   * vale a pena arrumar esse "bug" ou será que só o assert já tá bom?
-   */
 
   assert(k < this->points().size());
   using namespace std;
@@ -288,11 +292,6 @@ KdTree<D, R, A>::findNeighbors(const Point& point,
       R d0 = distance<D, R>(point, currentNode.nodeData.children[0]->bounds);
       R d1 = distance<D, R>(point, currentNode.nodeData.children[1]->bounds);
       
-      /**
-       * só ignorar o lado se a distância do ponto pro bound do nó for maior que 
-       * a pior distância em KNN.neighbours() e KNN estiver cheio
-       * tá certo isso que eu disse...?
-       */
       if (d0 < d1) {
         if (d0 > knn.getMaxDist() && knn.isFull())
           return;
@@ -315,20 +314,16 @@ KdTree<D, R, A>::findNeighbors(const Point& point,
   traverse(*_root);
   
   knn.sort();
-  //for(int i = 0; i < knn.neighbors().size(); i++) {
-  //  int neighborIndex = knn.neighbors()[i].second;
-
-  //  cout << "Vizinho " << (i + 1) << ": " << this->points()[neighborIndex] << endl;
-  //  cout << "Distância do vizinho pro ponto: " << knn.neighbors()[i].first << endl << endl;
-  //}
 
   return knn;
 }
 
-/**
- * não tem que ser em ordem de acordo com a distância, né?
- */
-// implementação de forEachNeighbor
+/*
+forEachNeighbor
+- Adaptação do findNeighbors
+- Determinamos se vale a pena explorar por meio da distância para um raio
+- Se encontramos um valor falso (PointFunc f), paramos a execução
+*/
 template <size_t D, typename R, typename A>
 void
 KdTree<D, R, A>::forEachNeighbor(const Point& point,
@@ -350,11 +345,9 @@ KdTree<D, R, A>::forEachNeighbor(const Point& point,
         int elementIndex = indexVector[firstPoint + i];
         Point currentPoint = this->points()[elementIndex];
         
-        // se o ponto no índice atual for o próprio ponto recebido pela função, ignorar
         if(point == currentPoint)
           continue;
         
-        // só os pontos que satisfazem a condição de filter são aceitos
         if(filter && !filter(this->points(), elementIndex)) 
           continue;
         
@@ -371,11 +364,6 @@ KdTree<D, R, A>::forEachNeighbor(const Point& point,
       R d0 = distance<D, R>(point, currentNode.nodeData.children[0]->bounds);
       R d1 = distance<D, R>(point, currentNode.nodeData.children[1]->bounds);
       
-      /**
-       * só ignorar o lado se a distância do ponto pro bound do nó for maior que 
-       * a pior distância em KNN.neighbours() e KNN estiver cheio
-       * tá certo isso que eu disse...?
-       */
       if (d0 < d1) {
         if (d0 > radius)
           return;

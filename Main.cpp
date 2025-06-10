@@ -5,6 +5,10 @@ using namespace tcii::p1;
 using namespace tcii::cg;
 using namespace tcii::physx;
 
+/*
+Autor(es): Guilherme Fernandes Nakazato ; Felipe Jun Takahashi
+*/
+
 // imprimindo partículas.... (D = 3 fixo)
 void printing_particles(const ParticleArray<Vec3f>& arr, Vec3f center) {
     std::cout << "\nParticle[index] [(position), (color)] in (distance)\n";
@@ -149,8 +153,8 @@ void random_nofilter_radius(int n_particles, int k_neighbors, Vec3f chosen_origi
     auto ps = ParticleSystem<Vec3f>::New();
     ps->setParticleBuffer(n_particles);
 
-    strict_radius_particles(ps, n_particles, chosen_origin, radius);
-    //loose_radius_particles(ps, n_particles, chosen_origin, radius);
+    //strict_radius_particles(ps, n_particles, chosen_origin, radius);
+    loose_radius_particles(ps, n_particles, chosen_origin, radius);
 
     ParticleArray<Vec3f> particles(*ps);
     KdTree3<float, ParticleArray<Vec3f>> tree(std::move(particles));
@@ -216,7 +220,7 @@ Função de Teste(n partículas, k vizinhos, origem, raio, cor)
 - Com filtro, com raio
 - Strict para distância exatamente raio
 - Loose para distância <= raio
-- Pela natureza aleatâria ao definir uma cor, colore-se uma parte das partículas com uma cor específica
+- Pela natureza aleatória ao definir uma cor, colore-se uma parte das partículas com uma cor específica
 */
 void random_filter_radius(int n_particles, int k_neighbors, Vec3f chosen_origin, float radius, Vec3f set_color) {
     auto ps = ParticleSystem<Vec3f>::New();
@@ -302,6 +306,12 @@ inline void testFunctions(int opt, int particles, int neighbors) {
 
 int main() {
     int opt = 0;
+
+    /*
+        Existe um assert para a busca por vizinhos de tamanho igual ao conjunto (i.e., n_particles == k_neighbors),
+        o assert parte do pressuposto de que a busca por vizinhos se refere aos vizinhos de uma partícula pertencente à árvore.
+        Entretanto, note que os casos de testes assumem o ponto de origem {0,0,0}, para fins de validação, que não, necessariamente, está na árvore.
+    */
 
     while(true) {
         int neighbors, particles;

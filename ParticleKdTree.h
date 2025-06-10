@@ -32,14 +32,19 @@ public:
     return _particles->position(unsigned(i));
   }
 
+  // Felipe Jun Takahashi
+  // Acessa a cor de uma determinada partícula
   auto& color(size_t i) const
   {
     return _particles->color(unsigned(i));
   }
 
+  // Guilherme Fernandes Nakazato
+  // Compara a cor de uma partícula com uma cor específica
   bool filter(const ParticleArray<Vec3f>& arr, unsigned i, const Vec3f& color) {
     return arr.color(i) == color;
   }
+
 private:  
   using PA = ParticleBuffer<Fields...>;
 

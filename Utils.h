@@ -38,6 +38,7 @@ distance(const Vec<D, R>& p, const Bounds<D, R>& bounds)
   return (R)std::sqrt(d);
 }
 
+// Guilherme Fernandes Nakazato
 template<size_t D, IsReal R>
 auto 
 distance(const Vec<D,R>& a, const Vec<D,R>& b) {

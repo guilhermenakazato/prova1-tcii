@@ -3,6 +3,10 @@
 
 #include "Vec2.h"
 
+/*
+Autor(es): Guilherme Fernandes Nakazato ; Felipe Jun Takahashi
+*/
+
 namespace tcii::cg
 { // begin namespace tcii::cg
 
