@@ -1,5 +1,5 @@
 # Autores
-Guilherme Fernandes Nakazato \n
+Guilherme Fernandes Nakazato <br />
 Felipe Jun Takahashi
 
 # Atividades
