@@ -10,7 +10,7 @@ Felipe Jun Takahashi
 - A5 (Finalizada)
 
 # Vídeo (Youtube)
-link: [Vídeo Prova Prática 1](https://www.youtube.com/watch?v=zIvqoGEAQj0)
+link: [Vídeo Prova Prática 1](https://www.youtube.com/watch?v=zIvqoGEAQj0) ou https://www.youtube.com/watch?v=zIvqoGEAQj0
 
 # Compilar
 ```
